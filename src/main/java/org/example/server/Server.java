@@ -13,15 +13,15 @@ public class Server {
         OutputStream os = null;
 
         try {
-            sock = new ServerSocket(1024); // создаем серверный сокет на порту 1024
+            sock = new ServerSocket(1024);
 
-            while (true) { // бесконечный цикл для возможности подключения нескольких клиентов
-                Socket client = sock.accept(); // ожидание подключения клиента
-                countclients++; // увеличиваем счетчик подключившихся клиентов
+            while (true) {
+                Socket client = sock.accept();
+                countclients++;
                 System.out.println("=======================================");
                 System.out.println("Client " + countclients + " connected");
-                is = client.getInputStream(); // входной поток для чтения данных
-                os = client.getOutputStream(); // выходной поток для записи данных
+                is = client.getInputStream();
+                os = client.getOutputStream();
 
                 boolean flag = true;
                 while (flag) {

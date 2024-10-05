@@ -56,11 +56,12 @@ public class Client  extends Frame implements ActionListener, WindowListener {
     private void connectToServer() {
         try {
             sock = new Socket(InetAddress.getByName(tf.getText()), Integer.parseInt(tf1.getText()));
-            ta.append("Connected to server\n");
-        } catch (NumberFormatException | UnknownHostException e) {
-            ta.append("Error: " + e.getMessage() + "\n");
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
         } catch (IOException e) {
-            ta.append("Error: " + e.getMessage() + "\n");
+            e.printStackTrace();
         }
     }
 
@@ -102,7 +103,7 @@ public class Client  extends Frame implements ActionListener, WindowListener {
         this.dispose(); // закрываем окно
     }
 
-    // Остальные методы WindowListener оставлены пустыми
+
     public void windowActivated(WindowEvent we) {}
     public void windowClosed(WindowEvent we) {}
     public void windowDeactivated(WindowEvent we) {}
