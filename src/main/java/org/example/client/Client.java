@@ -67,7 +67,22 @@ public class Client  extends Frame implements ActionListener, WindowListener {
 
     private void connectToServer() {
         try {
+            // Закрываем старые потоки, если они существуют
+            if (is != null) {
+                is.close();
+            }
+            if (os != null) {
+                os.close();
+            }
+            if (sock != null && !sock.isClosed()) {
+                sock.close();
+            }
+
+            // Создаем новый сокет
             sock = new Socket(InetAddress.getByName(tf.getText()), Integer.parseInt(tf1.getText()));
+            // Пересоздаем потоки после подключения
+            is = sock.getInputStream();
+            os = sock.getOutputStream();
         } catch (NumberFormatException e) {
             e.printStackTrace();
         } catch (UnknownHostException e) {
@@ -78,14 +93,12 @@ public class Client  extends Frame implements ActionListener, WindowListener {
     }
 
     public void actionPerformed(ActionEvent e) {
-        if (sock == null) {
+        if (sock == null || sock.isClosed()) {
             ta.append("Не подключены к серверу\n");
             return;
         }
-        try {
-            is = sock.getInputStream();
-            os = sock.getOutputStream();
 
+        try {
             String letters = tf2.getText();
 
             // Проверка на пустое поле
@@ -105,13 +118,17 @@ public class Client  extends Frame implements ActionListener, WindowListener {
         }
     }
 
+
     public void windowClosing(WindowEvent we) {
-        if (sock != null && !sock.isClosed()) {
-            try {
+        try {
+            if (sock != null && !sock.isClosed()) {
                 sock.close(); // закрываем сокет
-            } catch (IOException e) {}
+            }
+            ta.append("Отключено от сервера\n");
+        } catch (IOException e) {
+            ta.append("Ошибка при закрытии сокета: " + e.getMessage() + "\n");
         }
-        this.dispose(); // закрываем окно
+        this.dispose();
     }
 
 

@@ -9,8 +9,6 @@ public class Server {
 
     public static void main(String args[]) throws IOException {
         ServerSocket sock = null;
-        InputStream is = null;
-        OutputStream os = null;
 
         try {
             sock = new ServerSocket(1024);
@@ -20,29 +18,38 @@ public class Server {
                 countclients++;
                 System.out.println("=======================================");
                 System.out.println("Client " + countclients + " connected");
-                is = client.getInputStream();
-                os = client.getOutputStream();
 
-                boolean flag = true;
-                while (flag) {
-                    byte[] bytes = new byte[1024];
-                    is.read(bytes); // читаем информацию от клиента
-                    String str = new String(bytes, "UTF-8").trim(); // переводим в строку и убираем пробелы
+                try (InputStream is = client.getInputStream();
+                     OutputStream os = client.getOutputStream()) {
 
-                    // Сортируем символы
-                    char[] charArray = str.toCharArray();
-                    Arrays.sort(charArray);
-                    String sortedStr = new String(charArray);
+                    boolean flag = true;
+                    while (flag) {
+                        byte[] bytes = new byte[1024];
+                        int readBytes = is.read(bytes); // читаем информацию от клиента
 
-                    // Отправляем отсортированную строку клиенту
-                    os.write(sortedStr.getBytes());
+                        if (readBytes == -1) { // клиент отключился
+                            flag = false;
+                            System.out.println("Client " + countclients + " disconnected");
+                            break;
+                        }
+
+                        String str = new String(bytes, 0, readBytes, "UTF-8").trim(); // переводим в строку и убираем пробелы
+
+                        // Сортируем символы
+                        char[] charArray = str.toCharArray();
+                        Arrays.sort(charArray);
+                        String sortedStr = new String(charArray);
+
+                        // Отправляем отсортированную строку клиенту
+                        os.write(sortedStr.getBytes());
+                    }
+                } catch (IOException e) {
+                    System.out.println("Error: " + e.getMessage());
                 }
             }
         } catch (Exception e) {
             System.out.println("Error " + e.toString());
         } finally {
-            if (is != null) is.close(); // закрытие входного потока
-            if (os != null) os.close(); // закрытие выходного потока
             if (sock != null) sock.close(); // закрытие серверного сокета
             System.out.println("Client " + countclients + " disconnected");
         }
