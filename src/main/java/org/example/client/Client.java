@@ -51,6 +51,18 @@ public class Client  extends Frame implements ActionListener, WindowListener {
         });
 
         btnSend.addActionListener(this);
+
+        // Добавляем KeyListener для фильтрации ввода
+        tf2.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                char c = e.getKeyChar();
+                // Запретить ввод цифр
+                if (!Character.isLetter(c) && !Character.isWhitespace(c)) {
+                    e.consume(); // Отменяем событие
+                }
+            }
+        });
     }
 
     private void connectToServer() {
@@ -71,10 +83,17 @@ public class Client  extends Frame implements ActionListener, WindowListener {
             return;
         }
         try {
-            is = sock.getInputStream(); // входной поток для чтения данных
-            os = sock.getOutputStream(); // выходной поток для записи данных
+            is = sock.getInputStream();
+            os = sock.getOutputStream();
 
-            String letters = tf2.getText(); // получаем введенные буквы
+            String letters = tf2.getText();
+
+            // Проверка на пустое поле
+            if (letters.trim().isEmpty()) {
+                ta.append("Поле ввода букв не может быть пустым\n");
+                return;
+            }
+
             os.write(letters.getBytes()); // отправляем данные на сервер
 
             byte[] bytes = new byte[1024];
@@ -83,14 +102,6 @@ public class Client  extends Frame implements ActionListener, WindowListener {
             ta.append("Отсортированные буквы: " + sortedStr + "\n");
         } catch (IOException ex) {
             ta.append("Ошибка: " + ex.getMessage() + "\n");
-        } finally {
-            try {
-                if (os != null) os.close();
-                if (is != null) is.close();
-                if (sock != null) sock.close();
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            }
         }
     }
 
